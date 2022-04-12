@@ -5,10 +5,13 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Services;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace SoapDemo
 {
@@ -65,6 +68,24 @@ namespace SoapDemo
             return docElement;
         }
 
+        [WebMethod]
+        public XmlDocument GetOrders()
+        {
+            WebRequest request = WebRequest.Create("https://localhost:44346/api/Data");
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            Stream datastream = response.GetResponseStream();
+
+            StreamReader reader = new StreamReader(datastream);
+
+            string responseFromServer = reader.ReadToEnd();
+
+            XmlDocument document = JsonConvert.DeserializeXmlNode("{\"Order\":" + responseFromServer + "}", "Root");
+
+            return document;
+        }
+
 
         [WebMethod]
         public string UpdateDBRecords(int Id, string CustomerName)
@@ -117,5 +138,6 @@ namespace SoapDemo
             return returnMessage;
         }
 
+        
     }
 }
